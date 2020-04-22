@@ -23,7 +23,11 @@ import tensorflow.compat.v1 as tf
 import anchors
 from object_detection import preprocessor
 from object_detection import tf_example_decoder
-
+from dataset.csv_ import raise_from, _read_annotations,_read_classes , _open_for_csv
+import csv
+import os.path as osp
+import os
+from keras_preprocessing.image import load_img
 MAX_NUM_INSTANCES = 100
 
 
@@ -207,11 +211,34 @@ def pad_to_fixed_size(data, pad_value, output_shape):
 class InputReader(object):
   """Input reader for dataset."""
 
-  def __init__(self, file_pattern, is_training, use_fake_data=False):
-    self._file_pattern = file_pattern
+  def __init__(self, csv_data_file, csv_class_file,base_dir, is_training, use_fake_data=False):
+    # self._file_pattern = file_pattern
     self._is_training = is_training
     self._use_fake_data = use_fake_data
     self._max_num_instances = MAX_NUM_INSTANCES
+    self.base_dir = base_dir
+    if base_dir is None:
+      self.base_dir = osp.dirname(csv_data_file)
+    # parse the provided class file
+    try:
+      with _open_for_csv(csv_class_file) as file:
+        # class_name --> class_id
+        self.classes = _read_classes(csv.reader(file, delimiter=','))
+    except ValueError as e:
+      raise_from(ValueError('invalid CSV class file: {}: {}'.format(csv_class_file, e)), None)
+    self.labels = {}
+    # class_id --> class_name
+    for key, value in self.classes.items():
+      self.labels[value] = key
+
+    try:
+      with _open_for_csv(csv_data_file) as file:
+        # {'img_path1':[{'x1':xx,'y1':xx,'x2':xx,'y2':xx,'x3':xx,'y3':xx,'x4':xx,'y4':xx, 'class':xx}...],...}
+        self.image_data = _read_annotations(csv.reader(file, delimiter=','), self.classes)
+    except ValueError as e:
+      raise_from(ValueError('invalid CSV annotations file: {}: {}'.format(csv_data_file, e)), None)
+
+    self.image_names = list(self.image_data.keys())
 
   def __call__(self, params):
     input_anchors = anchors.Anchors(params['min_level'], params['max_level'],
@@ -315,8 +342,11 @@ class InputReader(object):
                 image_scale, boxes, is_crowds, areas, classes)
 
     batch_size = params['batch_size']
+
+
     dataset = tf.data.Dataset.list_files(
         self._file_pattern, shuffle=self._is_training)
+
     if self._is_training:
       dataset = dataset.repeat()
 

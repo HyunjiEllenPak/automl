@@ -247,10 +247,12 @@ def main(argv):
         train_batch_size=FLAGS.train_batch_size,
         config=run_config,
         params=params)
-    train_estimator.train(
-        input_fn=dataloader.InputReader(FLAGS.training_file_pattern,
+    input_fn = dataloader.InputReader(FLAGS.training_file_pattern,
                                         is_training=True,
-                                        use_fake_data=FLAGS.use_fake_data),
+                                        use_fake_data=FLAGS.use_fake_data)
+
+    train_estimator.train(
+        input_fn=input_fn,
         max_steps=int((FLAGS.num_epochs * FLAGS.num_examples_per_epoch) /
                       FLAGS.train_batch_size))
 
