@@ -92,12 +92,15 @@ def build_inputs(image_path_pattern: Text,
     ValueError if image_path_pattern doesn't match any file.
   """
   raw_images, images, scales = [], [], []
+
   for f in tf.io.gfile.glob(image_path_pattern):
     image = Image.open(f)
     raw_images.append(image)
     image, scale = image_preprocess(image, image_size)
     images.append(image)
     scales.append(scale)
+
+
   if not images:
     raise ValueError(
         'Cannot find any images for pattern {}'.format(image_path_pattern))
@@ -559,6 +562,8 @@ class ServingDriver(object):
     b.save()
     logging.info('Model saved at %s', output_dir)
 
+def sigmoid(x):
+    return 1/(1+np.exp(-x))
 
 class InferenceDriver(object):
   """A driver for doing batch inference.
@@ -630,8 +635,17 @@ class InferenceDriver(object):
       # Build model.
       class_outputs, box_outputs = build_model(self.model_name, images,
                                                **self.params)
+
       restore_ckpt(
           sess, self.ckpt_path, enable_ema=self.enable_ema, export_ckpt=None)
+      #check if custom dataset is trained well.
+      # cls, box = sess.run([class_outputs, box_outputs])
+      # cls_all = []
+      # for level in range(params['min_level'],params['max_level']+1):
+      #     cls_all.append(np.reshape(cls[level],[1,-1,90]))
+      # cls_ = np.amax(cls_all[0],-1)
+      # cls_sig = sigmoid(cls_)
+      
       # for postprocessing.
       params.update(
           dict(batch_size=len(raw_images), disable_pyfun=self.disable_pyfun))

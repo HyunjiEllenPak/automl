@@ -337,7 +337,7 @@ def add_metric_fn_inputs(params,
         [params['batch_size'], -1, num_classes]))
     box_outputs_all.append(tf.reshape(
         box_outputs[level], [params['batch_size'], -1, 4]))
-  cls_outputs_all = tf.concat(cls_outputs_all, 1)
+  cls_outputs_all = tf.concat(cls_outputs_all, 1)#레이어를 쌓아서 이 사이즈가 나옴->[ 1,49104,90 ]
   box_outputs_all = tf.concat(box_outputs_all, 1)
 
   if max_detection_points > 0:
@@ -358,7 +358,7 @@ def add_metric_fn_inputs(params,
   else:
     # Keep all anchors, but for each anchor, just keep the max probablity for
     # each class.
-    cls_outputs_idx = tf.math.argmax(cls_outputs_all, axis=-1)
+    cls_outputs_idx = tf.math.argmax(cls_outputs_all, axis=-1)#예측 박스당 가장 확률이 높은 클래스 인덱스 겟
     num_anchors = cls_outputs_all.shape[1]
 
     classes = cls_outputs_idx

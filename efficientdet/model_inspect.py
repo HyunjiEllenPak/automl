@@ -36,9 +36,9 @@ import inference
 import utils
 
 
-flags.DEFINE_string('model_name', 'efficientdet-d1', 'Model.')
+flags.DEFINE_string('model_name', 'efficientdet-d0', 'Model.')
 flags.DEFINE_string('logdir', '/tmp/deff/', 'log directory.')
-flags.DEFINE_string('runmode', 'dry', 'Run mode: {freeze, bm, dry}')
+flags.DEFINE_string('runmode', 'infer', 'Run mode: {freeze, bm, dry}')
 flags.DEFINE_string('trace_filename', None, 'Trace file name.')
 flags.DEFINE_integer('num_classes', 90, 'Number of classes.')
 flags.DEFINE_string('input_image_size', None, 'Size of input image. Enter a'
@@ -52,13 +52,13 @@ flags.DEFINE_bool('delete_logdir', True, 'Whether to delete logdir.')
 flags.DEFINE_bool('freeze', False, 'Freeze graph.')
 flags.DEFINE_bool('xla', False, 'Run with xla optimization.')
 
-flags.DEFINE_string('ckpt_path', None, 'checkpoint dir used for eval.')
+flags.DEFINE_string('ckpt_path', 'D:/pretrained_models/efficientdet-d0.tar/efficientdet-d0', 'checkpoint dir used for eval.')
 flags.DEFINE_string('export_ckpt', None, 'Path for exporting new models.')
-flags.DEFINE_bool('enable_ema', True, 'Use ema variables for eval.')
+flags.DEFINE_bool('enable_ema', False, 'Use ema variables for eval.')
 flags.DEFINE_string('data_format', None, 'data format, e.g., channel_last.')
 
-flags.DEFINE_string('input_image', None, 'Input image path for inference.')
-flags.DEFINE_string('output_image_dir', None, 'Output dir for inference.')
+flags.DEFINE_string('input_image', 'D:/imageData/cocodata/test2017/test2017/000000000416.jpg', 'Input image path for inference.')
+flags.DEFINE_string('output_image_dir', 'D:/pretrained_models/efficientdet-d0.tar/result', 'Output dir for inference.')
 
 # For visualization.
 flags.DEFINE_integer('line_thickness', None, 'Line thickness for box.')
